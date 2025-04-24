@@ -34,6 +34,8 @@ class SSD(nn.Module):
         # self.priors = Variable(self.priorbox.forward(), volatile=True)
         with torch.no_grad():
             self.priors = self.priorbox.forward()
+            if torch.cuda.is_available():
+                self.priors = self.priors.cuda()
         self.size = size
 
         # SSD network
@@ -102,7 +104,7 @@ class SSD(nn.Module):
                 loc.view(loc.size(0), -1, 4),                   # loc preds
                 self.softmax(conf.view(conf.size(0), -1,
                              self.num_classes)),                # conf preds
-                self.priors.type(type(x.data))                  # default boxes
+                self.priors.to(x.device)                  # default boxes
             )
         else:
             output = (
