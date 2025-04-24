@@ -58,11 +58,15 @@ if not os.path.exists(args.save_folder):
 
 if torch.cuda.is_available():
     if args.cuda:
-        torch.set_default_tensor_type('torch.cuda.FloatTensor')
+        # torch.set_default_tensor_type('torch.cuda.FloatTensor')
+        torch.set_default_dtype(torch.float32)
+        torch.set_default_device('cuda')
     if not args.cuda:
         print("WARNING: It looks like you have a CUDA device, but aren't using \
               CUDA.  Run with --cuda for optimal eval speed.")
-        torch.set_default_tensor_type('torch.FloatTensor')
+        # torch.set_default_tensor_type('torch.FloatTensor')
+        torch.set_default_dtype(torch.float32)
+        torch.set_default_device('cpu')
 else:
     torch.set_default_tensor_type('torch.FloatTensor')
 
@@ -382,7 +386,9 @@ def test_net(save_folder, net, cuda, dataset, transform, top_k,
         if args.cuda:
             x = x.cuda()
         _t['im_detect'].tic()
-        detections = net(x).data
+        # detections = net(x).data
+        with torch.no_grad():  # Add this line
+            detections = net(x).data  # No need for .data when using no_grad
         detect_time = _t['im_detect'].toc(average=False)
 
         # skip j = 0, because it's the background class
@@ -432,6 +438,7 @@ if __name__ == '__main__':
     if args.cuda:
         net = net.cuda()
         cudnn.benchmark = True
+
     # evaluation
     test_net(args.save_folder, net, args.cuda, dataset,
              BaseTransform(net.size, dataset_mean), args.top_k, 300,
