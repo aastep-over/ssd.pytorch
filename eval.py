@@ -68,7 +68,9 @@ if torch.cuda.is_available():
         torch.set_default_dtype(torch.float32)
         torch.set_default_device('cpu')
 else:
-    torch.set_default_tensor_type('torch.FloatTensor')
+    # torch.set_default_tensor_type('torch.FloatTensor')
+    torch.set_default_dtype(torch.float32)
+    torch.set_default_device('cpu')
 
 annopath = os.path.join(args.voc_root, 'VOC2007', 'Annotations', '%s.xml')
 imgpath = os.path.join(args.voc_root, 'VOC2007', 'JPEGImages', '%s.jpg')
